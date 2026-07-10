@@ -31,7 +31,7 @@ These skills teach *repo hygiene and command routing* — configuration that tra
 - **[wslgit](https://github.com/andy-5/wslgit)**: a Windows shim binary that forwards git invocations to WSL's git with path translation, mainly so VS Code's Windows-side git integration drives Linux git. Same routing idea, packaged as a fake `git.exe`; limited path translation, appears low-maintenance.
 - **[VS Code Remote-WSL](https://code.visualstudio.com/docs/remote/wsl)**: the architectural fix — UI on Windows, a server component inside WSL runs all tooling natively. The gold standard when your editor supports it; even so, its docs still tell you to sort out line endings and credentials, i.e. the hygiene layer remains.
 - **[git-worktree-relative](https://github.com/Kristian-Tan/git-worktree-relative)**: community tool automating exactly the relative worktree-pointer rewrite that `wsl-repos-from-windows` documents manually — prior art showing relative pointers are the portable answer (`git worktree repair` is the built-in for reattaching after moves).
-- **Obsidian inside WSL (WSLg)**: for vaults, the community workaround that moves the *app* across the boundary instead of the repo, restoring ext4 speed. Trade-off: Windows-side sync/integrations.
+- **Obsidian inside WSL (WSLg)**: for vaults, the community workaround that moves the *app* across the boundary instead of the repo, restoring ext4 speed. In real-world testing it is not usable: WSLg's rendering of Electron apps is badly broken (mangled icons, general visual glitches). Kept here as a warning rather than a recommendation.
 
 ## Layout
 
@@ -40,3 +40,13 @@ skills/
 ├── wsl-repos-from-windows/SKILL.md
 └── windows-repos-from-wsl/SKILL.md
 ```
+
+There is deliberately no top-level routing skill: for existing repos the path shape (`\\wsl.localhost\...` vs `/mnt/<drive>/...`) routes to the right skill by itself, and the placement decision for *new* repos is handled by `wsl-repos-from-windows` (the preferred layout), which points to its sibling for the exceptions. Revisit if this collection grows.
+
+## Open next steps
+
+- Run the skill eval loop (baseline-vs-skill comparison on realistic prompts) and trigger-description optimization; neither has been done yet.
+
+## License
+
+[MIT](LICENSE)

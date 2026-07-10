@@ -71,4 +71,4 @@ git config --global credential.helper "/mnt/c/Program\\ Files/Git/mingw64/bin/gi
 
 ## The Obsidian question
 
-If the only reason the repo is Windows-side is Obsidian, there is an alternative that restores full-speed Linux git: install Obsidian *inside* WSL (it renders as a normal window via WSLg) and keep the vault on ext4. Weigh that against mobile sync and other Windows-only integrations before moving a vault. If the vault stays Windows-side, apply everything above — a vault is exactly the kind of repo that accumulates long auto-generated filenames and per-device churn.
+Running Obsidian *inside* WSL (via WSLg) is sometimes suggested as a way to keep the vault on ext4, but in practice it is not viable: WSLg renders Electron apps poorly (broken icon rendering and other visual glitches, non-native look) to the point of being unusable for daily writing. Treat vault-on-Windows-filesystem as the realistic setup and apply everything above — a vault is exactly the kind of repo that accumulates long auto-generated filenames and per-device churn.

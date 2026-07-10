@@ -1,6 +1,6 @@
 ---
 name: windows-repos-from-wsl
-description: Keep a git repo that must live on the Windows filesystem (C:\, seen from WSL as /mnt/c/...) healthy when it is used from both Windows apps and WSL git. Use whenever a repo sits under /mnt/<drive> or a Windows path like C:\Users\...\Documents and git runs from WSL or from both sides — e.g. an Obsidian vault, a OneDrive/Documents folder, or any Windows app that cannot open \\wsl.localhost paths; and whenever such a repo shows phantom modified files, executable-bit (100755/100644) diffs, line-ending churn, files that will not stat with very long names, or git status taking tens of seconds.
+description: Keep a git repo that lives on the Windows filesystem (a C:\ path from Windows, /mnt/c/... from WSL) healthy when WSL is part of the environment at all. Use whenever the repo's path is under /mnt/<drive> or is a Windows-native path like C:\Users\...\Documents — including when a Windows-based agent works on it directly — e.g. an Obsidian vault, a OneDrive/Documents folder, or any repo kept Windows-side because an app cannot open \\wsl.localhost paths; and whenever such a repo shows phantom modified files, executable-bit (100755/100644) diffs, line-ending churn, files that will not stat with very long names, or git status taking tens of seconds.
 ---
 
 # Windows-side repos used from WSL
@@ -14,6 +14,12 @@ For WSL-side repos, WSL git is fast and Windows git is the hazard. Here it inver
 - Route bulk operations (status/log/diff over many files, clones, checkouts) to whichever git is native to the repo's side — here, Windows git — once the hygiene below makes that safe.
 - WSL git remains fine for scripted or occasional operations; just expect latency proportional to file count.
 - Avoid *alternating* sides rapidly: each git sees different `stat()` identities, so every switch invalidates the index stat-cache and forces a full re-hash — worst on the slow side.
+
+From a Windows-based agent there are exactly two viable routes into such a repo, and one dead end:
+
+1. **Native Windows tools on the `C:\` path** — fast; safe once the hygiene below is committed. Before the first commit from this side, verify identity resolves: `git config user.email` (Windows git configs are separate from WSL's and often lack it).
+2. **`wsl.exe -- git -C /mnt/<drive>/<path> ...`** — runs the Linux toolchain and WSL identity against the Windows repo; correct but slow (see above).
+3. ~~`\\wsl.localhost\<distro>\mnt\<drive>\...`~~ — looks like it should loop Windows → WSL → back to the Windows drive, and the mount points do appear in the UNC namespace, but WSL's 9P server does not proxy drvfs mounts: directory entries enumerate as nameless ghosts and file access fails with "Access is denied". Do not attempt this route.
 
 ## Hygiene: make both gits agree
 

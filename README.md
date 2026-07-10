@@ -41,7 +41,16 @@ skills/
 └── windows-repos-from-wsl/SKILL.md
 ```
 
-There is deliberately no top-level routing skill: for existing repos the path shape (`\\wsl.localhost\...` vs `/mnt/<drive>/...`) routes to the right skill by itself, and the placement decision for *new* repos is handled by `wsl-repos-from-windows` (the preferred layout), which points to its sibling for the exceptions. Revisit if this collection grows.
+There is deliberately no top-level routing skill. The routing key is **which filesystem the repo lives on**, and every way that fact shows up in context routes to one skill: `\\wsl.localhost\...` paths → `wsl-repos-from-windows`; `/mnt/<drive>/...` *or* Windows-native `C:\...` paths → `windows-repos-from-wsl` (a Windows-based agent sees a Windows-side repo as `C:\...`, so that skill triggers on both spellings). The placement decision for *new* repos is handled by `wsl-repos-from-windows` (the preferred layout), which points to its sibling for the exceptions. Revisit if this collection grows.
+
+## Running the agent itself: which side?
+
+The skills above are about repos; there's a prior human-setup question of where the *agent* runs. This belongs here rather than in a skill — an agent can't relocate its own host process. Options, from most to least integrated:
+
+1. **Claude Code CLI inside WSL** ([official guidance](https://code.claude.com/docs/en/setup)): everything Linux-native, the boundary disappears, and sandboxing works (it doesn't on native Windows). Terminal UI only.
+2. **Windows desktop app executing Windows-side, reaching WSL via `wsl.exe`** — the mode these skills were written from. Full desktop UI; every command crosses the boundary, hence the hygiene above. Note the desktop app has no documented WSL execution target (its environments are Local, Remote/cloud, and SSH).
+3. **CLI inside WSL + [Remote Control](https://code.claude.com/docs/en/remote-control.md)**: `claude --remote-control` (or `/remote-control` in a running session) makes the WSL session controllable from claude.ai/code in a browser or the mobile app — *not* from the Windows desktop app. Execution is fully Linux-side; UI is a web tab. Operational caveats: the local process must stay alive (tmux/screen is the community answer; nothing official, no auto-restart), a session that loses network for >10 minutes exits, and a failed reconnect requires re-running `/remote-control`. On resume: current docs state Remote Control sessions appear in the normal `--resume` picker and reconnect automatically; field reports of sessions that could only be reattached by session ID likely involve the headless server mode (`claude remote-control`, no dashes) rather than the interactive flows — if resumability matters, start interactively and enable `/remote-control` from within.
+4. **Desktop app → SSH → sshd inside WSL** (plausible, unverified for WSL): the desktop app's SSH environment pointed at a loopback sshd running in the distro would give desktop UI with true Linux-side execution — the closest analog of VS Code Remote-WSL. Untested; the docs don't address WSL as an SSH target specifically.
 
 ## Open next steps
 

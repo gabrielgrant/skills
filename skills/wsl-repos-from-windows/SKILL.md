@@ -18,7 +18,7 @@ wsl.exe -d <distro> -- sh -c 'cd /home/<user>/path/to/repo && <command>'
 - Translate paths with `wslpath`: `wslpath -u 'C:\...'` → Linux, `wslpath -w /home/...` → Windows. The manual mapping is `\\wsl.localhost\<distro>\home\u\x` ↔ `/home/u/x`.
 - Multi-line arguments (commit messages) survive best as multiple `-m` flags or a single-quoted `sh -c` body; avoid nesting heredocs through wsl.exe.
 
-Reading and editing files through the UNC path with filesystem tools (editors, an agent's Read/Write/Edit tools) is fine — they don't run line-ending filters. Just confirm the tool writes LF (verify with `git ls-files --eol` after the first write).
+Reading and editing files through the UNC path with filesystem tools (editors, an agent's Read/Write/Edit tools) is fine — they don't run line-ending filters. Two checks after writing: confirm the tool writes LF (`git ls-files --eol`), and know that **overwriting an executable file via UNC drops its executable bit** (the 9P mount creates files with default modes) — git will show a `100755 => 100644` mode change; `chmod +x` from WSL to restore it. Watch for that mode line whenever a script was edited from the Windows side.
 
 ## Repair broken worktree pointers FIRST
 

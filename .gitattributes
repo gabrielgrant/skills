@@ -1,0 +1,2 @@
+# Text files are LF everywhere; this repo's own skills explain why.
+* text=auto eol=lf
